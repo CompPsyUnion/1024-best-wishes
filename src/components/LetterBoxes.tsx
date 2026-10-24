@@ -186,13 +186,7 @@ export default function LetterBoxes({
         onSelect={syncActive}
         onKeyDown={handleKeyDown}
       />
-      <div
-        className="words"
-        onPointerDown={(e) => {
-          e.preventDefault();
-          focusInput();
-        }}
-      >
+      <div className="words" onClick={() => focusInput()}>
         {words.map((word, wi) => (
           <div className="word" key={wi}>
             {word.split("").map((_, ci) => {
@@ -207,9 +201,11 @@ export default function LetterBoxes({
                   className={cls}
                   style={{ "--i": idx } as CSSProperties}
                   aria-hidden="true"
-                  onPointerDown={(e) => {
+                  onClick={(e) => {
+                    // Focus on click, not pointerdown: a preventDefault-ed
+                    // pointerdown focus is dropped by iOS when the finger
+                    // lifts — the keyboard opens, then closes immediately.
                     e.stopPropagation();
-                    e.preventDefault();
                     focusInput(idx);
                   }}
                 >
