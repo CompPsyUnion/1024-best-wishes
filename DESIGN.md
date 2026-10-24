@@ -3,7 +3,7 @@
 ## 1. Visual Theme & Atmosphere
 
 A late-night machine-room terminal glowing gold in the dark. The whole game lives
-inside one terminal window (traffic lights, `psycho@cpu:~/1024-party`, a live
+inside one terminal window (traffic lights, `subscriber@cpu:~/1024-party`, a live
 `t=…s` stopwatch) floating over a faint gold code-rain. Density 5, variance 6,
 motion 8 — playful and choreographed, but every pixel stays deliberate. Gold is
 the only voice; everything else is quiet charcoal.

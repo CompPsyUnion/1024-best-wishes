@@ -153,7 +153,7 @@ export default function App() {
             <span className="dot dot-y" />
             <span className="dot dot-g" />
           </div>
-          <div className="term-title">psycho@cpu:~/1024-party</div>
+          <div className="term-title">subscriber@cpu:~/1024-party</div>
           <div className="term-timer">
             {startTime === null ? "--.-s" : `t=${elapsed.toFixed(1)}s`}
           </div>
@@ -162,7 +162,7 @@ export default function App() {
         <div className="term-body">
           {stage === "name" && (
             <section className="stage" key="name">
-              <p className="kicker">membership verification</p>
+              <p className="kicker">subscribership verification</p>
               <CpuTitle text="CPU" />
               <p className="cpu-sub">1024 PROGRAMMER&apos;S DAY</p>
               <div className="q-card">
@@ -236,7 +236,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <b>CPU</b> · Computer Psycho Union | 1024 Programmer&apos;s Day
+        <b>CPU</b> | 1024 Programmer&apos;s Day
       </footer>
 
       {toast && (

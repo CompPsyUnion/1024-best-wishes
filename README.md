@@ -1,7 +1,7 @@
 # 1024-best-wishes
 
 CPU (Computer Psycho Union) 1024 Programmer's Day mini-game — a single-page
-React app: two "membership verification" questions, spell out what CPU stands
+React app: two "subscribership verification" questions, spell out what CPU stands
 for and crack the programmer number, then a full-screen celebration.
 
 ## Play
@@ -11,7 +11,7 @@ for and crack the programmer number, then a full-screen celebration.
 - **Q2**: `2⁷ = ?` — the number hardcoded in programmer DNA (those who answer
   128 get gently rejected)
 - **Finale**: gold confetti + fireworks + terminal wishes, with your time and
-  personal best (kept in `localStorage`) — who is the true Psycho?
+  personal best (kept in `localStorage`) — who is the true Subscriber?
 
 ## Develop
 
