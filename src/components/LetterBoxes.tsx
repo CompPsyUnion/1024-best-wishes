@@ -20,7 +20,8 @@ function sanitize(raw: string, mode: "alpha" | "digit"): string {
   if (mode === "digit") {
     return raw.replace(/[^0-9]/g, "");
   }
-  return raw.replace(/[^a-zA-Z]/g, "").toUpperCase();
+  // Case is kept as typed — see the comment at the top of the component.
+  return raw.replace(/[^a-zA-Z]/g, "");
 }
 
 export default function LetterBoxes({
@@ -48,13 +49,14 @@ export default function LetterBoxes({
 
   // One real input holds the whole answer; the boxes are pure display.
   // A single element keeps focus for the whole run — no per-box focus()
-  // jumps (which make the iOS keyboard dismiss and reopen) — and IME
-  // composition can finish before anything is committed (Chinese IMEs
-  // used to leak pinyin letters into the boxes).
+  // jumps (which make the iOS keyboard dismiss and reopen). Values keep
+  // the case exactly as typed (uppercased only for display and checks),
+  // so the controlled value always equals the DOM and React never
+  // rewrites the input mid-IME-session — that rewrite cancels the
+  // composition and used to leave input permanently dead afterwards.
   const inputRef = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
   const started = useRef(false);
-  const composing = useRef(false);
 
   useEffect(() => {
     const ids = timers.current;
@@ -108,7 +110,7 @@ export default function LetterBoxes({
     setValues(next);
     setActive(Math.min(clean.length, letters.length - 1));
     if (next.every((v) => v !== "")) {
-      const attempt = next.join("");
+      const attempt = next.join("").toUpperCase();
       later(() => {
         if (attempt === target) {
           setStatus("solved");
@@ -131,15 +133,16 @@ export default function LetterBoxes({
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const native = e.nativeEvent as InputEvent;
-    if (composing.current || native.isComposing) {
+    // Skip IME marked text, and only when the event itself says so — a
+    // persistent "composing" flag that outlives a canceled composition
+    // session would swallow every later keystroke.
+    if ((e.nativeEvent as InputEvent).isComposing) {
       return;
     }
     commit(e.target.value);
   };
 
   const handleCompositionEnd = (e: CompositionEvent<HTMLInputElement>) => {
-    composing.current = false;
     commit(e.currentTarget.value);
   };
 
@@ -177,9 +180,6 @@ export default function LetterBoxes({
         aria-label="answer input"
         readOnly={status !== "typing"}
         onChange={handleChange}
-        onCompositionStart={() => {
-          composing.current = true;
-        }}
         onCompositionEnd={handleCompositionEnd}
         onFocus={handleFocus}
         onBlur={() => setFocused(false)}
@@ -209,7 +209,7 @@ export default function LetterBoxes({
                     focusInput(idx);
                   }}
                 >
-                  {value}
+                  {value.toUpperCase()}
                 </div>
               );
             })}
