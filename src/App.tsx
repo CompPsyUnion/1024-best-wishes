@@ -37,7 +37,6 @@ export default function App() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [now, setNow] = useState(0);
-  const [peeks, setPeeks] = useState(0);
   const [toast, setToast] = useState<Toast | null>(null);
   const [best, setBest] = useState<number | null>(() => loadBest());
   const [newRecord, setNewRecord] = useState(false);
@@ -128,7 +127,6 @@ export default function App() {
     setStartTime(null);
     setEndTime(null);
     setNow(0);
-    setPeeks(0);
     setNewRecord(false);
   }, []);
 
@@ -169,20 +167,16 @@ export default function App() {
               <p className="cpu-sub">1024 PROGRAMMER&apos;S DAY</p>
               <div className="q-card">
                 <p className="q-tag">Q1 / 2</p>
-                <h2 className="q-title">
-                  Spell out what CPU stands for — prove you&apos;re one of us
-                </h2>
+                <h2 className="q-title">Spell out: what CPU stands for?</h2>
                 <p className="q-hint">
                   3 words · 19 letters · case doesn&apos;t matter
                 </p>
                 <LetterBoxes
                   answer="COMPUTER PSYCHO UNION"
                   mode="alpha"
-                  peekable
                   onFirstInput={handleFirstInput}
                   onWrong={handleWrongName}
                   onSolved={handleSolvedName}
-                  onPeek={() => setPeeks((p) => p + 1)}
                 />
               </div>
             </section>
@@ -215,15 +209,10 @@ export default function App() {
                 1024
               </div>
               <h2 className="party-title">HAPPY PROGRAMMER&apos;S DAY</h2>
-              <p className="party-sub">
-                COMPUTER PSYCHO UNION · COMPUTER ENTHUSIASTS ASSOCIATION
-              </p>
+              <p className="party-sub">COMPUTER PSYCHO UNION</p>
               <div className="stats">
                 <span className="chip">
                   TIME <b>{elapsed.toFixed(1)}s</b>
-                </span>
-                <span className="chip">
-                  PEEKS <b>{peeks}</b>
                 </span>
                 {best !== null && (
                   <span className={`chip${newRecord ? " chip-gold" : ""}`}>
@@ -232,9 +221,6 @@ export default function App() {
                   </span>
                 )}
               </div>
-              {peeks === 0 && (
-                <p className="no-peek">zero peeks · a true Psycho (・∀・)</p>
-              )}
               <Terminal />
               <div className="actions">
                 <button className="btn btn-primary" onClick={restart}>

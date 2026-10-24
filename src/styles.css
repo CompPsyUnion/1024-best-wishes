@@ -400,10 +400,6 @@ button {
     background-color 0.16s ease;
 }
 
-.box::placeholder {
-  color: rgba(247, 212, 71, 0.38);
-}
-
 .box:focus {
   border-color: var(--gold);
   box-shadow:
@@ -467,36 +463,6 @@ button {
   60% {
     transform: translateX(6px);
   }
-}
-
-.q-tools {
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-}
-
-.peek-btn {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
-  color: var(--ink-dim);
-  padding: 8px 14px;
-  min-height: 44px;
-  border: 1px dashed rgba(236, 235, 228, 0.2);
-  border-radius: 999px;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.12s var(--spring);
-}
-
-.peek-btn:hover {
-  color: var(--gold);
-  border-color: rgba(247, 212, 71, 0.5);
-}
-
-.peek-btn:active {
-  transform: scale(0.96);
 }
 
 /* ── power stage ───────────────────────────────────────────── */
@@ -617,15 +583,6 @@ button {
   border-color: rgba(247, 212, 71, 0.45);
   color: var(--gold);
   background: var(--gold-soft);
-}
-
-.no-peek {
-  margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--gold);
-  opacity: 0.8;
-  animation: fadeUp 0.5s 0.65s var(--ease-out) both;
 }
 
 /* ── terminal typing ───────────────────────────────────────── */

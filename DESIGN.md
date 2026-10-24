@@ -70,6 +70,6 @@ scroll.
 ## 7. Anti-Patterns (Banned)
 
 No pure black, no purple/blue neon, no second accent, no Inter, no emoji in UI
-chrome (kaomoji in copy only), no fake metrics (timer/peek counts are real
-play data), no overlapping layers, no filler text, no horizontal scroll on
+chrome (kaomoji in copy only), no fake metrics (the timer is real play data),
+no overlapping layers, no filler text, no horizontal scroll on
 mobile.

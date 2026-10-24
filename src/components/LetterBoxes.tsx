@@ -11,11 +11,9 @@ export interface LetterBoxesProps {
   /** Answer with spaces between words — spaces become word gaps. */
   answer: string;
   mode?: "alpha" | "digit";
-  peekable?: boolean;
   onFirstInput?: () => void;
   onWrong?: (attempt: string) => void;
   onSolved?: () => void;
-  onPeek?: () => void;
 }
 
 function sanitize(raw: string, mode: "alpha" | "digit"): string {
@@ -28,11 +26,9 @@ function sanitize(raw: string, mode: "alpha" | "digit"): string {
 export default function LetterBoxes({
   answer,
   mode = "alpha",
-  peekable = false,
   onFirstInput,
   onWrong,
   onSolved,
-  onPeek,
 }: LetterBoxesProps) {
   const words = answer.split(" ").filter(Boolean);
   const letters = answer.replace(/\s/g, "").split("");
@@ -47,7 +43,6 @@ export default function LetterBoxes({
 
   const [values, setValues] = useState<string[]>(() => letters.map(() => ""));
   const [status, setStatus] = useState<"typing" | "solved" | "wrong">("typing");
-  const [peeking, setPeeking] = useState(false);
 
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const timers = useRef<number[]>([]);
@@ -169,12 +164,6 @@ export default function LetterBoxes({
     apply(next, Math.min(i + clean.length, letters.length) - 1);
   };
 
-  const peek = () => {
-    setPeeking(true);
-    onPeek?.();
-    later(() => setPeeking(false), 2200);
-  };
-
   const stateClass =
     status === "solved" ? " solved" : status === "wrong" ? " wrong" : "";
 
@@ -183,7 +172,7 @@ export default function LetterBoxes({
       <div className="words" aria-label="answer input">
         {words.map((word, wi) => (
           <div className="word" key={wi}>
-            {word.split("").map((ch, ci) => {
+            {word.split("").map((_, ci) => {
               const idx = offsets[wi] + ci;
               const value = values[idx];
               return (
@@ -195,7 +184,6 @@ export default function LetterBoxes({
                   className={value ? "box filled" : "box"}
                   style={{ "--i": idx } as CSSProperties}
                   value={value}
-                  placeholder={peeking && !value ? ch : ""}
                   inputMode={mode === "digit" ? "numeric" : "text"}
                   autoCapitalize={mode === "alpha" ? "characters" : "off"}
                   autoComplete="off"
@@ -214,13 +202,6 @@ export default function LetterBoxes({
           </div>
         ))}
       </div>
-      {peekable && status === "typing" && (
-        <div className="q-tools">
-          <button type="button" className="peek-btn" onClick={peek}>
-            {peeking ? "shh — don't get caught" : "peek at the answer"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
