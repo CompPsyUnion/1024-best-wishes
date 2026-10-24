@@ -1,0 +1,5 @@
+# Intentionally empty: marks this repo as its own pnpm workspace root so
+# installs never walk up to a pnpm-workspace.yaml above it (e.g. ~).
+
+allowBuilds:
+  esbuild: true
