@@ -2,9 +2,9 @@ import {
   useEffect,
   useRef,
   useState,
-  type ClipboardEvent,
+  type ChangeEvent,
+  type CompositionEvent,
   type CSSProperties,
-  type KeyboardEvent,
 } from "react";
 
 export interface LetterBoxesProps {
@@ -43,10 +43,18 @@ export default function LetterBoxes({
 
   const [values, setValues] = useState<string[]>(() => letters.map(() => ""));
   const [status, setStatus] = useState<"typing" | "solved" | "wrong">("typing");
+  const [active, setActive] = useState(0);
+  const [focused, setFocused] = useState(false);
 
-  const inputs = useRef<(HTMLInputElement | null)[]>([]);
+  // One real input holds the whole answer; the boxes are pure display.
+  // A single element keeps focus for the whole run — no per-box focus()
+  // jumps (which make the iOS keyboard dismiss and reopen) — and IME
+  // composition can finish before anything is committed (Chinese IMEs
+  // used to leak pinyin letters into the boxes).
+  const inputRef = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
   const started = useRef(false);
+  const composing = useRef(false);
 
   useEffect(() => {
     const ids = timers.current;
@@ -55,11 +63,11 @@ export default function LetterBoxes({
     };
   }, []);
 
-  // Desktop: land the cursor in the first box so typing can start at once.
-  // Mobile: skip, so the on-screen keyboard doesn't jump up on page load.
+  // Desktop: focus once on mount. Mobile: wait for a tap, so the keyboard
+  // doesn't jump up on page load.
   useEffect(() => {
     if (window.matchMedia("(pointer: fine)").matches) {
-      inputs.current[0]?.focus();
+      focusInput();
     }
   }, []);
 
@@ -67,23 +75,38 @@ export default function LetterBoxes({
     timers.current.push(window.setTimeout(fn, ms));
   };
 
-  const focusAt = (i: number) => {
-    const el = inputs.current[i];
+  const focusInput = (caret?: number) => {
+    const el = inputRef.current;
+    if (!el || status !== "typing") {
+      return;
+    }
+    el.focus();
+    const pos = caret ?? el.value.length;
+    el.setSelectionRange(pos, pos);
+    setActive(Math.min(pos, letters.length - 1));
+  };
+
+  const syncActive = () => {
+    const el = inputRef.current;
     if (el) {
-      el.focus();
-      el.select();
+      setActive(
+        Math.min(el.selectionStart ?? el.value.length, letters.length - 1),
+      );
     }
   };
 
-  const apply = (next: string[], focusIdx: number | null) => {
-    if (!started.current) {
+  const commit = (raw: string) => {
+    if (status !== "typing") {
+      return;
+    }
+    const clean = sanitize(raw, mode).slice(0, letters.length);
+    const next = letters.map((_, k) => clean[k] ?? "");
+    if (!started.current && clean) {
       started.current = true;
       onFirstInput?.();
     }
     setValues(next);
-    if (focusIdx !== null) {
-      focusAt(focusIdx);
-    }
+    setActive(Math.min(clean.length, letters.length - 1));
     if (next.every((v) => v !== "")) {
       const attempt = next.join("");
       later(() => {
@@ -96,72 +119,44 @@ export default function LetterBoxes({
           later(() => {
             setValues(letters.map(() => ""));
             setStatus("typing");
-            focusAt(0);
+            setActive(0);
+            const el = inputRef.current;
+            if (el && document.activeElement === el) {
+              el.setSelectionRange(0, 0);
+            }
           }, 750);
         }
       }, 380);
     }
   };
 
-  const handleChange = (i: number, raw: string) => {
-    if (status !== "typing") {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const native = e.nativeEvent as InputEvent;
+    if (composing.current || native.isComposing) {
       return;
     }
-    const clean = sanitize(raw, mode);
-    if (clean === "") {
-      const next = values.slice();
-      next[i] = "";
-      apply(next, null);
-      return;
-    }
-    const next = values.slice();
-    next[i] = clean.slice(-1);
-    apply(next, i + 1 < letters.length ? i + 1 : i);
+    commit(e.target.value);
   };
 
-  const handleKeyDown = (
-    i: number,
-    e: KeyboardEvent<HTMLInputElement>,
-  ): void => {
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      if (status !== "typing") {
-        return;
-      }
-      const next = values.slice();
-      if (next[i]) {
-        next[i] = "";
-        apply(next, i);
-      } else if (i > 0) {
-        next[i - 1] = "";
-        apply(next, i - 1);
-      }
-    } else if (e.key === "ArrowLeft" && i > 0) {
-      e.preventDefault();
-      focusAt(i - 1);
-    } else if (e.key === "ArrowRight" && i < letters.length - 1) {
-      e.preventDefault();
-      focusAt(i + 1);
-    }
+  const handleCompositionEnd = (e: CompositionEvent<HTMLInputElement>) => {
+    composing.current = false;
+    commit(e.currentTarget.value);
   };
 
-  const handlePaste = (
-    i: number,
-    e: ClipboardEvent<HTMLInputElement>,
-  ): void => {
-    if (status !== "typing") {
-      return;
+  const handleKeyDown = () => {
+    // The caret may have moved (arrows / backspace) — sync the highlight.
+    window.requestAnimationFrame(syncActive);
+  };
+
+  const handleFocus = () => {
+    setFocused(true);
+    const el = inputRef.current;
+    if (el) {
+      // Continue where typing left off — the end.
+      const end = el.value.length;
+      el.setSelectionRange(end, end);
+      setActive(Math.min(end, letters.length - 1));
     }
-    e.preventDefault();
-    const clean = sanitize(e.clipboardData.getData("text"), mode);
-    if (!clean) {
-      return;
-    }
-    const next = values.slice();
-    for (let k = 0; k < clean.length && i + k < letters.length; k++) {
-      next[i + k] = clean[k];
-    }
-    apply(next, Math.min(i + clean.length, letters.length) - 1);
   };
 
   const stateClass =
@@ -169,34 +164,57 @@ export default function LetterBoxes({
 
   return (
     <div className={`boxes${stateClass}`}>
-      <div className="words" aria-label="answer input">
+      <input
+        ref={inputRef}
+        className="ghost-input"
+        value={values.join("")}
+        inputMode={mode === "digit" ? "numeric" : "text"}
+        autoCapitalize={mode === "alpha" ? "characters" : "off"}
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="done"
+        aria-label="answer input"
+        readOnly={status !== "typing"}
+        onChange={handleChange}
+        onCompositionStart={() => {
+          composing.current = true;
+        }}
+        onCompositionEnd={handleCompositionEnd}
+        onFocus={handleFocus}
+        onBlur={() => setFocused(false)}
+        onSelect={syncActive}
+        onKeyDown={handleKeyDown}
+      />
+      <div
+        className="words"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          focusInput();
+        }}
+      >
         {words.map((word, wi) => (
           <div className="word" key={wi}>
             {word.split("").map((_, ci) => {
               const idx = offsets[wi] + ci;
               const value = values[idx];
+              const cls = `box${value ? " filled" : ""}${
+                focused && idx === active ? " active" : ""
+              }`;
               return (
-                <input
+                <div
                   key={idx}
-                  ref={(el) => {
-                    inputs.current[idx] = el;
-                  }}
-                  className={value ? "box filled" : "box"}
+                  className={cls}
                   style={{ "--i": idx } as CSSProperties}
-                  value={value}
-                  inputMode={mode === "digit" ? "numeric" : "text"}
-                  autoCapitalize={mode === "alpha" ? "characters" : "off"}
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  maxLength={2}
-                  aria-label={`character ${idx + 1}`}
-                  readOnly={status !== "typing"}
-                  onChange={(e) => handleChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  onPaste={(e) => handlePaste(idx, e)}
-                  onFocus={(e) => e.target.select()}
-                />
+                  aria-hidden="true"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    focusInput(idx);
+                  }}
+                >
+                  {value}
+                </div>
               );
             })}
           </div>

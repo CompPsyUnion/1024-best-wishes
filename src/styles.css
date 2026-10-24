@@ -364,6 +364,25 @@ button {
 }
 
 /* ── letter boxes ──────────────────────────────────────────── */
+.boxes {
+  position: relative;
+}
+
+/* One invisible input owns the keyboard; the boxes are pure display. */
+.ghost-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px; /* < 16px makes iOS zoom on focus */
+  background: transparent;
+  pointer-events: none;
+}
+
 .words {
   display: flex;
   flex-wrap: wrap;
@@ -372,6 +391,7 @@ button {
   column-gap: clamp(16px, 5vw, 30px);
   row-gap: 14px;
   margin-top: clamp(20px, 4vw, 28px);
+  cursor: text;
 }
 
 .word {
@@ -380,6 +400,9 @@ button {
 }
 
 .box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: clamp(26px, 7.4vw, 42px);
   height: clamp(40px, 10.5vw, 54px);
   border-radius: 10px;
@@ -389,10 +412,7 @@ button {
   font-family: var(--font-mono);
   font-size: clamp(17px, 4.6vw, 23px);
   font-weight: 700;
-  text-align: center;
-  caret-color: var(--gold);
-  text-transform: uppercase;
-  outline: none;
+  user-select: none;
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease,
@@ -400,12 +420,21 @@ button {
     background-color 0.16s ease;
 }
 
-.box:focus {
+.box.active {
   border-color: var(--gold);
   box-shadow:
     0 0 0 3px rgba(247, 212, 71, 0.16),
     0 4px 18px rgba(247, 212, 71, 0.12);
   transform: translateY(-3px);
+}
+
+/* Blinking caret inside the active empty box. */
+.box.active:not(.filled)::after {
+  content: "";
+  width: 2px;
+  height: 52%;
+  background: var(--gold);
+  animation: blink 1s steps(1) infinite;
 }
 
 .box.filled {

@@ -34,10 +34,11 @@ the only voice; everything else is quiet charcoal.
 
 ## 4. Component Stylings
 
-- **Letter boxes:** CAPTCHA-style single-char inputs; 1.5px gold border at 28%
-  alpha, filled state tints gold 6%; focus lifts -3px with a soft gold ring
-  (no neon). Solved = staggered gold wave (45ms/box); wrong = shake + red
-  border, then clear
+- **Letter boxes:** CAPTCHA-style display boxes fed by one invisible input
+  (single focus target — no iOS keyboard bounce, IME-safe); 1.5px gold border
+  at 28% alpha, filled state tints gold 6%; the active box lifts -3px with a
+  soft gold ring and a blinking caret (no neon). Solved = staggered gold wave
+  (45ms/box); wrong = shake + red border, then clear
 - **Buttons:** primary = solid gold, tactile press (translateY 1px, scale .97),
   inset top highlight, soft gold shadow; ghost = 1px gold outline at 40%
 - **Chips:** pill, mono, gold values; record chip inverts to gold-tinted
