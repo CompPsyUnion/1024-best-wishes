@@ -8,8 +8,7 @@ for and crack the programmer number, then a full-screen celebration.
 
 - **Q1**: CAPTCHA-style boxes — spell out what CPU stands for (3 words,
   19 letters, case-insensitive)
-- **Q2**: `2⁷ = ?` — the number hardcoded in programmer DNA (those who answer
-  128 get gently rejected)
+- **Q2**: `2¹⁰ = ?` — the number hardcoded in programmer DNA
 - **Finale**: gold confetti + fireworks + terminal wishes, with your time and
   personal best (kept in `localStorage`) — who is the true Subscriber?
 

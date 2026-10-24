@@ -98,19 +98,9 @@ export default function App() {
     [showToast],
   );
 
-  const handleWrongPower = useCallback(
-    (attempt: string) => {
-      if (attempt === "128") {
-        showToast(
-          "Mathematically correct. Today, only 1024 counts (¬‿¬)",
-          true,
-        );
-      } else {
-        showToast("Not that one — check your programmer DNA", true);
-      }
-    },
-    [showToast],
-  );
+  const handleWrongPower = useCallback(() => {
+    showToast("Not that one — check your programmer DNA", true);
+  }, [showToast]);
 
   const handleSolvedName = useCallback(() => {
     showToast("[OK] identity confirmed — welcome home");
@@ -185,9 +175,9 @@ export default function App() {
           {stage === "power" && (
             <section className="stage" key="power">
               <p className="kicker">final question · an easy one</p>
-              <div className="equation" aria-label="two to the seventh power">
+              <div className="equation" aria-label="two to the tenth power">
                 <span className="base">2</span>
-                <sup>7</sup> <span className="qmark">= ?</span>
+                <sup>10</sup> <span className="qmark">= ?</span>
               </div>
               <p className="q-hint">
                 the number hardcoded in every programmer&apos;s DNA
