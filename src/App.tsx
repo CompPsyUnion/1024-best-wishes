@@ -167,7 +167,7 @@ export default function App() {
               <p className="cpu-sub">1024 PROGRAMMER&apos;S DAY</p>
               <div className="q-card">
                 <p className="q-tag">Q1 / 2</p>
-                <h2 className="q-title">Spell out: what CPU stands for?</h2>
+                <h2 className="q-title">Spell out what CPU stands for</h2>
                 <p className="q-hint">
                   3 words · 19 letters · case doesn&apos;t matter
                 </p>
