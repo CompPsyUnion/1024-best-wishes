@@ -1,28 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Line = { kind: "cmd" | "out" | "ok"; text: string };
 
-const SCRIPT: Line[] = [
-  { kind: "cmd", text: "whoami" },
-  { kind: "out", text: "a proud Psycho · Computer Psycho Union" },
-  { kind: "cmd", text: "./wish --to=all --day=1024" },
-  { kind: "ok", text: "may your code compile on the first try" },
-  { kind: "ok", text: "may your hair hold and your offers stack" },
-  { kind: "cmd", text: "sudo rm -rf /worries" },
-  { kind: "ok", text: "worries deleted; happiness cannot be killed" },
-];
+/** GNU-style `date` output for the moment the terminal mounts. */
+function dateStamp(): string {
+  const d = new Date();
+  const day = d
+    .toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })
+    .replace(",", "");
+  const t = d.toTimeString(); // "16:41:23 GMT+0800 (China Standard Time)"
+  return `${day} ${t.slice(0, 8)} ${t.slice(9, 17)} ${d.getFullYear()}`;
+}
 
 export default function Terminal() {
   const [done, setDone] = useState(0);
   const [chars, setChars] = useState(0);
   const [finished, setFinished] = useState(false);
 
+  const SCRIPT = useMemo<Line[]>(
+    () => [
+      { kind: "cmd", text: "date" },
+      { kind: "out", text: dateStamp() },
+      { kind: "cmd", text: "./wish --to=all --day=1024" },
+      { kind: "ok", text: "may your code compile on the first try" },
+      { kind: "ok", text: "may your hair hold and your offers stack" },
+      { kind: "cmd", text: "sudo rm -rf /worries" },
+      { kind: "ok", text: "worries deleted; happiness cannot be killed" },
+    ],
+    [],
+  );
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setDone(SCRIPT.length);
       setFinished(true);
     }
-  }, []);
+  }, [SCRIPT]);
 
   useEffect(() => {
     if (finished) {
@@ -49,7 +66,7 @@ export default function Terminal() {
       );
     }
     return () => window.clearTimeout(t);
-  }, [done, chars, finished]);
+  }, [done, chars, finished, SCRIPT]);
 
   const visibleCount = finished ? SCRIPT.length : done + 1;
 
